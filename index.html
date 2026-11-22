@@ -660,6 +660,28 @@
       };
     }
 
+    function packThanks(d) {
+      const m = {};
+      if (d.deceased) m.d = d.deceased;
+      if (d.sender) m.s = d.sender;
+      const tplKey = Object.keys(THANKS_TEMPLATES).find((k) => THANKS_TEMPLATES[k] === d.msg);
+      if (tplKey) {
+        if (tplKey !== "basic") m.k = tplKey;
+      } else if (d.msg) {
+        m.m = d.msg;
+      }
+      return m;
+    }
+
+    function unpackThanks(m) {
+      if (m.deceased !== undefined || m.sender !== undefined) return m;
+      return {
+        deceased: m.d || "",
+        sender: m.s || "",
+        msg: m.m || THANKS_TEMPLATES[m.k || "basic"] || THANKS_TEMPLATES.basic
+      };
+    }
+
     function buildSharePayload(kind) {
       const base = location.origin + location.pathname;
       if (kind === "bugo") {
@@ -680,9 +702,7 @@
         return { title: `故 ${d.name || "○○○"} 님 부고장 - 호수장의`, text: lines, url };
       } else {
         const d = getThanksData();
-        const compact = {};
-        Object.entries(d).forEach(([k, v]) => { if (v) compact[k] = v; });
-        const url = base.startsWith("http") ? `${base}?t=${encodeData(compact)}` : "";
+        const url = base.startsWith("http") ? `${base}?t=${encodeData(packThanks(d))}` : "";
         const lines = [
           `[호수장의 답례인사]`,
           d.msg || THANKS_TEMPLATES.basic,
@@ -854,7 +874,7 @@
         } catch {}
       } else if (thanksParam) {
         try {
-          const d = decodeData(thanksParam);
+          const d = unpackThanks(decodeData(thanksParam));
           $("viewerCard").innerHTML = buildThanksHTML(d);
           $("editorMode").classList.add("hidden");
           $("viewerMode").classList.remove("hidden");
