@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="호수장의 · 모바일 부고장" />
+  <meta property="og:description" content="삼가 고인의 명복을 빕니다. 모바일 부고장 및 답례인사" />
+  <meta property="og:image" content="https://leejua486.github.io/hosu-jangui/cover.png" />
   <title>호수장의 · 모바일 부고장 · 답례인사</title>
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <style>
     :root {
       --bg: #f5f5f2;
@@ -631,8 +636,60 @@
       showToast("문구가 복사되었습니다. 카톡/문자에 붙여넣기 하세요!");
     };
 
+    const KAKAO_JS_KEY = "ef6028ec0d30687f53b2901c9bc7bd3f";
+    const COVER_IMAGE_URL = "https://leejua486.github.io/hosu-jangui/cover.png";
+
+    function ensureKakao() {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init(KAKAO_JS_KEY);
+      }
+      return Boolean(window.Kakao && window.Kakao.isInitialized());
+    }
+
     window.shareKakao = async (kind) => {
       const p = buildSharePayload(kind);
+      const shareUrl = p.url || location.href;
+      if (ensureKakao()) {
+        try {
+          let cardTitle = p.title;
+          let cardDesc = "";
+          let btnTitle = "모바일 부고장 보기";
+          if (kind === "bugo") {
+            const d = getBugoData();
+            cardTitle = `[호수장의 부고] 故 ${d.name || "○○○"}${d.age ? ` (향년 ${d.age})` : ""}`;
+            const parts = [
+              d.hall ? `빈소: ${d.hall} ${d.room}`.trim() : "",
+              d.funeral ? `발인: ${d.funeral}` : ""
+            ].filter(Boolean);
+            cardDesc = parts.join(" · ") || "삼가 고인의 명복을 빕니다.";
+            btnTitle = "모바일 부고장 보기";
+          } else {
+            const d = getThanksData();
+            cardTitle = "[호수장의] 삼가 감사 인사 올립니다";
+            cardDesc = (d.msg || THANKS_TEMPLATES.basic).split("\n")[0];
+            btnTitle = "답례인사 보기";
+          }
+          window.Kakao.Share.sendDefault({
+            objectType: "feed",
+            content: {
+              title: cardTitle,
+              description: cardDesc,
+              imageUrl: COVER_IMAGE_URL,
+              link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
+            },
+            buttons: [
+              {
+                title: btnTitle,
+                link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
+              }
+            ]
+          });
+          return;
+        } catch (e) {
+          console.error("Kakao share failed:", e);
+          showToast("카카오 도메인 등록(leejua486.github.io)을 확인해 주세요.");
+        }
+      }
       if (navigator.share) {
         try {
           await navigator.share({ title: p.title, text: p.text });
