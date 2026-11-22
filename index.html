@@ -6,7 +6,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="호수장의 · 모바일 부고장" />
   <meta property="og:description" content="삼가 고인의 명복을 빕니다. 모바일 부고장 및 답례인사" />
-  <meta property="og:image" content="https://leejua486.github.io/hosu-jangui/cover.png" />
+  <meta property="og:image" content="https://leejua486.github.io/hosu-jangui/cover.jpg" />
   <title>호수장의 · 모바일 부고장 · 답례인사</title>
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <style>
@@ -599,15 +599,49 @@
       renderThanks();
     }
 
+    function packBugo(d) {
+      const m = {};
+      if (d.name) m.n = d.name;
+      if (d.age) m.a = d.age;
+      if (d.death) m.d = d.death;
+      if (d.funeral) m.f = d.funeral;
+      if (d.hall) m.h = d.hall;
+      if (d.room) m.r = d.room;
+      if (d.addr) m.ad = d.addr;
+      if (d.burial) m.b = d.burial;
+      if (d.account) m.ac = d.account;
+      if (d.msg && d.msg !== BUGO_TEMPLATES.basic) m.m = d.msg;
+      if (d.sangju && d.sangju.length) {
+        m.s = d.sangju.map((s) => [s.rel || "", s.name || "", s.phone || ""]);
+      }
+      return m;
+    }
+
+    function unpackBugo(m) {
+      if (m.name !== undefined || m.hall !== undefined || m.sangju !== undefined) {
+        if (!m.sangju) m.sangju = [];
+        return m;
+      }
+      return {
+        name: m.n || "",
+        age: m.a || "",
+        death: m.d || "",
+        funeral: m.f || "",
+        hall: m.h || "",
+        room: m.r || "",
+        addr: m.ad || "",
+        burial: m.b || "",
+        account: m.ac || "",
+        msg: m.m || BUGO_TEMPLATES.basic,
+        sangju: Array.isArray(m.s) ? m.s.map((x) => ({ rel: x[0] || "", name: x[1] || "", phone: x[2] || "" })) : []
+      };
+    }
+
     function buildSharePayload(kind) {
       const base = location.origin + location.pathname;
       if (kind === "bugo") {
         const d = getBugoData();
-        const compact = {};
-        Object.entries(d).forEach(([k, v]) => {
-          if (Array.isArray(v) ? v.length > 0 : Boolean(v)) compact[k] = v;
-        });
-        const url = base.startsWith("http") ? `${base}?b=${encodeData(compact)}` : "";
+        const url = base.startsWith("http") ? `${base}?b=${encodeData(packBugo(d))}` : "";
         const lines = [
           `[호수장의 모바일 부고장]`,
           `故 ${d.name || "○○○"}${d.age ? ` (향년 ${d.age})` : ""} 님께서 별세하셨기에 삼가 알려드립니다.`,
@@ -648,7 +682,7 @@
     };
 
     const KAKAO_JS_KEY = "441c77e0d13c53714b7acfa4c9f2ad96";
-    const COVER_IMAGE_URL = "https://leejua486.github.io/hosu-jangui/cover.png";
+    const COVER_IMAGE_URL = "https://leejua486.github.io/hosu-jangui/cover.jpg";
 
     function ensureKakao() {
       if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -686,6 +720,8 @@
               title: cardTitle,
               description: cardDesc,
               imageUrl: COVER_IMAGE_URL,
+              imageWidth: 640,
+              imageHeight: 800,
               link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
             },
             buttons: [
@@ -750,8 +786,7 @@
       const thanksParam = params.get("t") || (hash.startsWith("#thanks=") ? hash.slice(8) : "");
       if (bugoParam) {
         try {
-          const d = decodeData(bugoParam);
-          if (!d.sangju) d.sangju = [];
+          const d = unpackBugo(decodeData(bugoParam));
           $("viewerCard").innerHTML = buildBugoHTML(d);
           $("editorMode").classList.add("hidden");
           $("viewerMode").classList.remove("hidden");
