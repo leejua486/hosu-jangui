@@ -464,9 +464,15 @@
         <div class="card">
           <h2>상주 정보 <button class="btn-sm" onclick="addSangju()">+ 상주 추가</button></h2>
           <div id="sangjuList"></div>
-          <div class="field" style="margin-top: 10px;">
-            <label>부의금 계좌 (선택)</label>
-            <input id="bAccount" placeholder="예: 국민은행 123456-01-123456 (예금주: 홍상주)" oninput="renderBugo()" />
+          <div class="grid-2" style="margin-top: 10px;">
+            <div class="field">
+              <label>은행명 (선택)</label>
+              <input id="bBank" placeholder="예: 국민은행" oninput="renderBugo()" />
+            </div>
+            <div class="field">
+              <label>계좌번호 (선택)</label>
+              <input id="bAccountNum" inputmode="numeric" placeholder="예: 123456-01-123456" oninput="renderBugo()" />
+            </div>
           </div>
           <div class="field">
             <label>인사말</label>
@@ -617,7 +623,8 @@
         room: $("bRoom").value.trim(),
         addr: $("bAddr").value.trim(),
         burial: $("bBurial").value.trim(),
-        account: $("bAccount").value.trim(),
+        bank: $("bBank").value.trim(),
+        accountNum: $("bAccountNum").value.trim(),
         msg: $("bMsg").value.trim(),
         sangju: sangju.filter((s) => s.name.trim() || s.phone.trim())
       };
@@ -633,6 +640,8 @@
         ? `https://map.kakao.com/link/search/${encodeURIComponent(d.addr || d.hall)}`
         : "";
       const firstPhone = d.sangju.find((s) => s.phone.trim())?.phone.trim() || "";
+      const accountDisplay = [d.bank, d.accountNum].filter(Boolean).join(" ") || d.account || "";
+      const accountCopyRaw = d.accountNum || d.account || "";
 
       return `
         <div class="preview-hero">
@@ -652,12 +661,12 @@
             <div class="info-row"><span class="info-key">발인</span><span class="info-val">${esc(d.funeral || "-")}</span></div>
             ${d.burial ? `<div class="info-row"><span class="info-key">장지</span><span class="info-val">${esc(d.burial)}</span></div>` : ""}
             <div class="info-row"><span class="info-key">상주</span><span class="info-val">${sangjuText}</span></div>
-            ${d.account ? `<div class="info-row"><span class="info-key">부의계좌</span><span class="info-val">${esc(d.account)}</span></div>` : ""}
+            ${accountDisplay ? `<div class="info-row"><span class="info-key">부의계좌</span><span class="info-val">${esc(accountDisplay)}</span></div>` : ""}
           </div>
           <div class="viewer-actions">
             ${mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener">장례식장 지도 보기</a>` : ""}
             ${firstPhone ? `<a href="tel:${esc(firstPhone)}">상주 연락하기</a>` : ""}
-            ${d.account ? `<button onclick="copyString('${esc(d.account)}')">계좌번호 복사</button>` : ""}
+            ${accountCopyRaw ? `<button onclick="copyAccountDigits('${esc(accountCopyRaw)}')">계좌번호 복사</button>` : ""}
           </div>
         </div>
       `;
@@ -724,6 +733,8 @@
       if (d.room) m.r = d.room;
       if (d.addr) m.ad = d.addr;
       if (d.burial) m.b = d.burial;
+      if (d.bank) m.bk = d.bank;
+      if (d.accountNum) m.an = d.accountNum;
       if (d.account) m.ac = d.account;
       if (d.msg && d.msg !== BUGO_TEMPLATES.basic) m.m = d.msg;
       if (d.sangju && d.sangju.length) {
@@ -746,6 +757,8 @@
         room: m.r || "",
         addr: m.ad || "",
         burial: m.b || "",
+        bank: m.bk || "",
+        accountNum: m.an || "",
         account: m.ac || "",
         msg: m.m || BUGO_TEMPLATES.basic,
         sangju: Array.isArray(m.s) ? m.s.map((x) => ({ rel: x[0] || "", name: x[1] || "", phone: x[2] || "" })) : []
@@ -789,7 +802,7 @@
           d.funeral ? `• 발인: ${d.funeral}` : "",
           d.burial ? `• 장지: ${d.burial}` : "",
           d.sangju && d.sangju.length ? `• 상주: ${d.sangju.map((s) => `${s.rel} ${s.name} ${s.phone}`.trim()).join(" / ")}` : "",
-          d.account ? `• 부의계좌: ${d.account}` : "",
+          ([d.bank, d.accountNum].filter(Boolean).join(" ") || d.account) ? `• 부의계좌: ${[d.bank, d.accountNum].filter(Boolean).join(" ") || d.account}` : "",
           url ? `\n모바일 부고장 보기:\n${url}` : ""
         ].filter(Boolean).join("\n");
         return { title: `故 ${d.name || "○○○"} 님 부고장 - 호수장의`, text: lines, url };
@@ -813,6 +826,11 @@
 
     window.copyString = (str) => {
       navigator.clipboard?.writeText(str).then(() => showToast("복사되었습니다."));
+    };
+
+    window.copyAccountDigits = (str) => {
+      const digits = String(str || "").replace(/\D/g, "") || String(str || "");
+      navigator.clipboard?.writeText(digits).then(() => showToast("계좌번호 숫자만 복사되었습니다."));
     };
 
     window.copyText = async (kind) => {
@@ -915,7 +933,7 @@
 
     window.resetBugo = () => {
       if (!confirm("작성 중인 부고장을 초기화할까요?")) return;
-      ["bName", "bAge", "bDeath", "bFuneral", "bHall", "bRoom", "bAddr", "bBurial", "bAccount"].forEach((id) => $(id).value = "");
+      ["bName", "bAge", "bDeath", "bFuneral", "bHall", "bRoom", "bAddr", "bBurial", "bBank", "bAccountNum"].forEach((id) => $(id).value = "");
       $("bMsg").value = BUGO_TEMPLATES.basic;
       sangju = [{ rel: "상주", name: "", phone: "" }];
       renderSangjuInputs();
@@ -1008,7 +1026,8 @@
         $("bRoom").value = savedBugo.room || "";
         $("bAddr").value = savedBugo.addr || "";
         $("bBurial").value = savedBugo.burial || "";
-        $("bAccount").value = savedBugo.account || "";
+        $("bBank").value = savedBugo.bank || "";
+        $("bAccountNum").value = savedBugo.accountNum || savedBugo.account || "";
         $("bMsg").value = savedBugo.msg || BUGO_TEMPLATES.basic;
         if (Array.isArray(savedBugo.sangju) && savedBugo.sangju.length) sangju = savedBugo.sangju;
       } else {
