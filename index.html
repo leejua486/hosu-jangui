@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>호수장의 · 모바일 부고장 · 답례인사</title>
+  <style>
+    :root {
+      --bg: #f5f5f2;
+      --surface: #ffffff;
+      --ink: #1e242b;
+      --muted: #646d78;
+      --line: #e2e4e0;
+      --navy: #1f2a37;
+      --gold: #a68b5b;
+      --kakao: #fee500;
+      --kakao-ink: #191919;
+      --sms: #1f2a37;
+      --accent-soft: #f0eee9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 18px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--gold);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    header p {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px 14px 48px;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 13px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 480px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .field { margin-bottom: 11px; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fafaf8;
+      color: var(--ink);
+    }
+    textarea { resize: vertical; min-height: 92px; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--navy);
+      background: #fff;
+    }
+    .sangju-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 1.2fr 36px;
+      gap: 6px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    @media (max-width: 480px) {
+      .sangju-row { grid-template-columns: 80px 1fr 1fr 34px; }
+    }
+    .btn-sm {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-del {
+      padding: 8px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: #b91c1c;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .preview-box {
+      background: #fcfbf8;
+      border: 1px solid #d9d4c7;
+      border-radius: 12px;
+      padding: 20px 16px;
+    }
+    .preview-ribbon {
+      text-align: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e5e0d5;
+      margin-bottom: 14px;
+    }
+    .ribbon-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .preview-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+    }
+    .preview-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 6px 0 0;
+    }
+    .preview-msg {
+      white-space: pre-line;
+      font-size: 14px;
+      color: #2c343d;
+      text-align: center;
+      margin: 14px 0;
+      padding: 12px;
+      background: #f5f3ed;
+      border-radius: 8px;
+    }
+    .info-list {
+      border-top: 1px solid #e5e0d5;
+      padding-top: 12px;
+      font-size: 13px;
+    }
+    .info-row {
+      display: flex;
+      gap: 10px;
+      padding: 6px 0;
+    }
+    .info-key {
+      width: 68px;
+      flex-shrink: 0;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .info-val { flex: 1; color: var(--ink); word-break: keep-all; }
+    .share-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .btn-kakao {
+      background: var(--kakao);
+      color: var(--kakao-ink);
+      border: none;
+      border-radius: 10px;
+      padding: 14px 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-sms {
+      background: var(--sms);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-copy {
+      width: 100%;
+      margin-top: 8px;
+      background: var(--accent-soft);
+      color: var(--navy);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(31, 42, 55, 0.94);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      display: none;
+      z-index: 99;
+      white-space: nowrap;
+    }
+    .viewer-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .viewer-actions a, .viewer-actions button {
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .hidden { display: none !important; }
+    .template-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>호수장의</h1>
+    <p>모바일 부고장 · 답례인사 간편 작성 및 전송</p>
+  </header>
+
+  <div class="wrap">
+    <!-- 공유 링크로 열었을 때 보이는 뷰어 모드 -->
+    <div id="viewerMode" class="hidden">
+      <div class="card preview-box" id="viewerCard"></div>
+      <button class="btn-copy" onclick="exitViewer()">새 부고장 / 답례인사 만들기</button>
+    </div>
+
+    <!-- 작성 모드 -->
+    <div id="editorMode">
+      <div class="tabs">
+        <button class="tab-btn active" id="tabBugo" onclick="switchTab('bugo')">부고장 만들기</button>
+        <button class="tab-btn" id="tabThanks" onclick="switchTab('thanks')">답례인사 만들기</button>
+      </div>
+
+      <!-- 1. 부고장 작성 패널 -->
+      <section id="panelBugo">
+        <div class="card">
+          <h2>고인 및 장례 정보 <button class="btn-sm" onclick="resetBugo()">초기화</button></h2>
+          <div class="grid-2">
+            <div class="field">
+              <label>고인 성함</label>
+              <input id="bName" placeholder="예: 홍길동" oninput="renderBugo()" />
+            </div>
+            <div class="field">
+              <label>향년 (연세)</label>
+              <input id="bAge" placeholder="예: 82세" oninput="renderBugo()" />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>별세 일시</label>
+              <input id="bDeath" placeholder="예: 2026년 11월 22일 오전 9시" oninput="renderBugo()" />
+            </div>
+            <div class="field">
+              <label>발인 일시</label>
+              <input id="bFuneral" placeholder="예: 2026년 11월 24일 오전 8시" oninput="renderBugo()" />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>장례식장명</label>
+              <input id="bHall" placeholder="예: 천안단국대병원 장례식장" oninput="renderBugo()" />
+            </div>
+            <div class="field">
+              <label>빈소 (호실)</label>
+              <input id="bRoom" placeholder="예: 특1호실" oninput="renderBugo()" />
+            </div>
+          </div>
+          <div class="field">
+            <label>장례식장 주소</label>
+            <input id="bAddr" placeholder="예: 충남 천안시 동남구 망향로 201" oninput="renderBugo()" />
+          </div>
+          <div class="field">
+            <label>장지</label>
+            <input id="bBurial" placeholder="예: 천안추모공원" oninput="renderBugo()" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>상주 정보 <button class="btn-sm" onclick="addSangju()">+ 상주 추가</button></h2>
+          <div id="sangjuList"></div>
+          <div class="field" style="margin-top: 10px;">
+            <label>부의금 계좌 (선택)</label>
+            <input id="bAccount" placeholder="예: 국민은행 123456-01-123456 (예금주: 홍상주)" oninput="renderBugo()" />
+          </div>
+          <div class="field">
+            <label>인사말</label>
+            <div class="template-pills">
+              <button class="btn-sm" onclick="setBugoMsg('basic')">정중한 기본형</button>
+              <button class="btn-sm" onclick="setBugoMsg('short')">간결형</button>
+            </div>
+            <textarea id="bMsg" oninput="renderBugo()"></textarea>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>미리보기 및 전송</h2>
+          <div class="preview-box" id="bugoPreview"></div>
+          <div class="share-grid">
+            <button class="btn-kakao" onclick="shareKakao('bugo')">카카오톡으로 보내기</button>
+            <button class="btn-sms" onclick="sendSMS('bugo')">문자로 보내기</button>
+          </div>
+          <button class="btn-copy" onclick="copyText('bugo')">부고장 문구 + 링크 전체 복사</button>
+        </div>
+      </section>
+
+      <!-- 2. 답례인사 작성 패널 -->
+      <section id="panelThanks" class="hidden">
+        <div class="card">
+          <h2>답례인사 작성 <button class="btn-sm" onclick="resetThanks()">초기화</button></h2>
+          <div class="grid-2">
+            <div class="field">
+              <label>고인 성함</label>
+              <input id="tDeceased" placeholder="예: 故 홍길동" oninput="renderThanks()" />
+            </div>
+            <div class="field">
+              <label>상주 (보내는 분)</label>
+              <input id="tSender" placeholder="예: 홍상주 올림" oninput="renderThanks()" />
+            </div>
+          </div>
+          <div class="field">
+            <label>답례 문구 템플릿</label>
+            <div class="template-pills">
+              <button class="btn-sm" onclick="setThanksMsg('basic')">기본 감사형</button>
+              <button class="btn-sm" onclick="setThanksMsg('flower')">조문·조화 감사형</button>
+              <button class="btn-sm" onclick="setThanksMsg('short')">간결 문자형</button>
+            </div>
+            <textarea id="tMsg" style="min-height: 130px;" oninput="renderThanks()"></textarea>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>미리보기 및 전송</h2>
+          <div class="preview-box" id="thanksPreview"></div>
+          <div class="share-grid">
+            <button class="btn-kakao" onclick="shareKakao('thanks')">카카오톡으로 보내기</button>
+            <button class="btn-sms" onclick="sendSMS('thanks')">문자로 보내기</button>
+          </div>
+          <button class="btn-copy" onclick="copyText('thanks')">답례인사 문구 전체 복사</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const BUGO_TEMPLATES = {
+      basic: "삼가 부고(訃告)를 알립니다.\n바쁘시더라도 부디 오셔서 고인의 마지막 길을 따뜻하게 배웅해 주시면 감사하겠습니다.",
+      short: "삼가 알립니다.\n먼 길 마다치 않으시고 고인의 명복을 빌어주시면 감사하겠습니다."
+    };
+    const THANKS_TEMPLATES = {
+      basic: "삼가 감사 인사 올립니다.\n바쁘신 와중에도 따뜻한 위로와 조의를 베풀어 주신 덕분에 장례를 무사히 마칠 수 있었습니다.\n직접 찾아뵙고 인사드려야 도리이나 우선 글로 대신함을 너그러이 양해 부탁드립니다.\n베풀어 주신 은혜 오래도록 잊지 않겠습니다.",
+      flower: "진심으로 감사드립니다.\n상중에 바쁘신 가운데에도 직접 조문해 주시고, 따뜻한 마음과 화환·부의로 큰 위로를 전해 주셔서 깊이 감사드립니다.\n경황이 없어 일일이 찾아뵙지 못하고 먼저 문자로 감사 인사를 올립니다.",
+      short: "바쁘신 중에도 조문과 따뜻한 위로 보내주셔서 진심으로 감사드립니다. 덕분에 무사히 잘 모셨습니다. 늘 건강과 평안을 기원합니다."
+    };
+
+    let sangju = [
+      { rel: "상주", name: "", phone: "" }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+
+    function showToast(msg) {
+      const t = $("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { t.style.display = "none"; }, 2400);
+    }
+
+    function encodeData(obj) {
+      const json = JSON.stringify(obj);
+      return btoa(unescape(encodeURIComponent(json)));
+    }
+
+    function decodeData(str) {
+      return JSON.parse(decodeURIComponent(escape(atob(str))));
+    }
+
+    function switchTab(tab) {
+      $("tabBugo").classList.toggle("active", tab === "bugo");
+      $("tabThanks").classList.toggle("active", tab === "thanks");
+      $("panelBugo").classList.toggle("hidden", tab !== "bugo");
+      $("panelThanks").classList.toggle("hidden", tab !== "thanks");
+    }
+
+    function renderSangjuInputs() {
+      const box = $("sangjuList");
+      box.innerHTML = sangju.map((s, i) => `
+        <div class="sangju-row">
+          <input placeholder="관계" value="${esc(s.rel)}" oninput="updateSangju(${i}, 'rel', this.value)" />
+          <input placeholder="성함" value="${esc(s.name)}" oninput="updateSangju(${i}, 'name', this.value)" />
+          <input placeholder="연락처" value="${esc(s.phone)}" oninput="updateSangju(${i}, 'phone', this.value)" />
+          <button class="btn-del" onclick="removeSangju(${i})" title="삭제">✕</button>
+        </div>
+      `).join("");
+    }
+
+    function esc(v) {
+      return String(v || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+    }
+
+    window.addSangju = () => {
+      sangju.push({ rel: "자", name: "", phone: "" });
+      renderSangjuInputs();
+      renderBugo();
+    };
+    window.removeSangju = (i) => {
+      if (sangju.length <= 1) return;
+      sangju.splice(i, 1);
+      renderSangjuInputs();
+      renderBugo();
+    };
+    window.updateSangju = (i, key, val) => {
+      sangju[i][key] = val;
+      renderBugo();
+    };
+
+    function getBugoData() {
+      return {
+        name: $("bName").value.trim(),
+        age: $("bAge").value.trim(),
+        death: $("bDeath").value.trim(),
+        funeral: $("bFuneral").value.trim(),
+        hall: $("bHall").value.trim(),
+        room: $("bRoom").value.trim(),
+        addr: $("bAddr").value.trim(),
+        burial: $("bBurial").value.trim(),
+        account: $("bAccount").value.trim(),
+        msg: $("bMsg").value.trim(),
+        sangju: sangju.filter((s) => s.name.trim() || s.phone.trim())
+      };
+    }
+
+    function buildBugoHTML(d) {
+      const titleName = d.name ? `故 ${esc(d.name)}` : "故 ○○○";
+      const ageText = d.age ? ` (향년 ${esc(d.age)})` : "";
+      const sangjuText = d.sangju.length
+        ? d.sangju.map((s) => `${esc(s.rel)} ${esc(s.name)} ${s.phone ? `(${esc(s.phone)})` : ""}`).join("<br/>")
+        : "상주 정보를 입력해 주세요";
+      const mapUrl = d.addr || d.hall
+        ? `https://map.kakao.com/link/search/${encodeURIComponent(d.addr || d.hall)}`
+        : "";
+      const firstPhone = d.sangju.find((s) => s.phone.trim())?.phone.trim() || "";
+
+      return `
+        <div class="preview-ribbon">
+          <span class="ribbon-tag">謹 弔 · 호수장의</span>
+          <h3 class="preview-title">${titleName}${ageText} 별세</h3>
+          <p class="preview-sub">${d.death ? `별세: ${esc(d.death)}` : "별세 일시 미입력"}</p>
+        </div>
+        <div class="preview-msg">${esc(d.msg || BUGO_TEMPLATES.basic)}</div>
+        <div class="info-list">
+          <div class="info-row"><span class="info-key">빈소</span><span class="info-val">${esc(d.hall || "-")} ${esc(d.room)}</span></div>
+          ${d.addr ? `<div class="info-row"><span class="info-key">주소</span><span class="info-val">${esc(d.addr)}</span></div>` : ""}
+          <div class="info-row"><span class="info-key">발인</span><span class="info-val">${esc(d.funeral || "-")}</span></div>
+          ${d.burial ? `<div class="info-row"><span class="info-key">장지</span><span class="info-val">${esc(d.burial)}</span></div>` : ""}
+          <div class="info-row"><span class="info-key">상주</span><span class="info-val">${sangjuText}</span></div>
+          ${d.account ? `<div class="info-row"><span class="info-key">부의계좌</span><span class="info-val">${esc(d.account)}</span></div>` : ""}
+        </div>
+        <div class="viewer-actions">
+          ${mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener">장례식장 지도 보기</a>` : ""}
+          ${firstPhone ? `<a href="tel:${esc(firstPhone)}">상주 연락하기</a>` : ""}
+          ${d.account ? `<button onclick="copyString('${esc(d.account)}')">계좌번호 복사</button>` : ""}
+        </div>
+      `;
+    }
+
+    function buildThanksHTML(d) {
+      const dec = d.deceased ? `${esc(d.deceased)} ` : "";
+      const sender = d.sender || "상주 올림";
+      return `
+        <div class="preview-ribbon">
+          <span class="ribbon-tag">感 謝 · 호수장의</span>
+          <h3 class="preview-title">삼가 감사 인사 올립니다</h3>
+          <p class="preview-sub">${dec}장례에 따뜻한 위로를 보내주셔서 감사합니다</p>
+        </div>
+        <div class="preview-msg" style="text-align:left;">${esc(d.msg || THANKS_TEMPLATES.basic)}</div>
+        <div style="text-align:right; font-weight:700; color:var(--navy); font-size:14px; margin-top:10px;">
+          ${esc(sender)}
+        </div>
+      `;
+    }
+
+    function renderBugo() {
+      const d = getBugoData();
+      $("bugoPreview").innerHTML = buildBugoHTML(d);
+      localStorage.setItem("hosu_bugo_draft", JSON.stringify({ ...d, sangju }));
+    }
+
+    function getThanksData() {
+      return {
+        deceased: $("tDeceased").value.trim(),
+        sender: $("tSender").value.trim(),
+        msg: $("tMsg").value.trim()
+      };
+    }
+
+    function renderThanks() {
+      const d = getThanksData();
+      $("thanksPreview").innerHTML = buildThanksHTML(d);
+      localStorage.setItem("hosu_thanks_draft", JSON.stringify(d));
+    }
+
+    function setBugoMsg(key) {
+      $("bMsg").value = BUGO_TEMPLATES[key];
+      renderBugo();
+    }
+    function setThanksMsg(key) {
+      $("tMsg").value = THANKS_TEMPLATES[key];
+      renderThanks();
+    }
+
+    function buildSharePayload(kind) {
+      const base = location.href.split("#")[0];
+      if (kind === "bugo") {
+        const d = getBugoData();
+        const url = base.startsWith("http") ? `${base}#bugo=${encodeData(d)}` : "";
+        const lines = [
+          `[호수장의 모바일 부고장]`,
+          `故 ${d.name || "○○○"}${d.age ? ` (향년 ${d.age})` : ""} 님께서 별세하셨기에 삼가 알려드립니다.`,
+          d.death ? `• 별세: ${d.death}` : "",
+          d.hall ? `• 빈소: ${d.hall} ${d.room}`.trim() : "",
+          d.addr ? `• 주소: ${d.addr}` : "",
+          d.funeral ? `• 발인: ${d.funeral}` : "",
+          d.burial ? `• 장지: ${d.burial}` : "",
+          d.sangju.length ? `• 상주: ${d.sangju.map((s) => `${s.rel} ${s.name} ${s.phone}`.trim()).join(" / ")}` : "",
+          d.account ? `• 부의계좌: ${d.account}` : "",
+          url ? `\n모바일 부고장 보기:\n${url}` : ""
+        ].filter(Boolean).join("\n");
+        return { title: `故 ${d.name || "○○○"} 님 부고장 - 호수장의`, text: lines, url };
+      } else {
+        const d = getThanksData();
+        const url = base.startsWith("http") ? `${base}#thanks=${encodeData(d)}` : "";
+        const lines = [
+          `[호수장의 답례인사]`,
+          d.msg || THANKS_TEMPLATES.basic,
+          "",
+          d.sender || "상주 올림",
+          url ? `\n답례장 보기:\n${url}` : ""
+        ].filter((v) => v !== "").join("\n");
+        return { title: `감사 인사 - 호수장의`, text: lines, url };
+      }
+    }
+
+    window.copyString = (str) => {
+      navigator.clipboard?.writeText(str).then(() => showToast("복사되었습니다."));
+    };
+
+    window.copyText = async (kind) => {
+      const p = buildSharePayload(kind);
+      await navigator.clipboard?.writeText(p.text);
+      showToast("문구가 복사되었습니다. 카톡/문자에 붙여넣기 하세요!");
+    };
+
+    window.shareKakao = async (kind) => {
+      const p = buildSharePayload(kind);
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: p.title, text: p.text });
+          return;
+        } catch (e) {
+          if (e.name === "AbortError") return;
+        }
+      }
+      await navigator.clipboard?.writeText(p.text);
+      showToast("복사 완료! 카카오톡 대화창에 바로 붙여넣기 하세요.");
+    };
+
+    window.sendSMS = (kind) => {
+      const p = buildSharePayload(kind);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const sep = isIOS ? "&" : "?";
+      location.href = `sms:${sep}body=${encodeURIComponent(p.text)}`;
+    };
+
+    window.resetBugo = () => {
+      if (!confirm("작성 중인 부고장을 초기화할까요?")) return;
+      ["bName", "bAge", "bDeath", "bFuneral", "bHall", "bRoom", "bAddr", "bBurial", "bAccount"].forEach((id) => $(id).value = "");
+      $("bMsg").value = BUGO_TEMPLATES.basic;
+      sangju = [{ rel: "상주", name: "", phone: "" }];
+      renderSangjuInputs();
+      renderBugo();
+    };
+
+    window.resetThanks = () => {
+      if (!confirm("작성 중인 답례인사를 초기화할까요?")) return;
+      $("tDeceased").value = "";
+      $("tSender").value = "";
+      $("tMsg").value = THANKS_TEMPLATES.basic;
+      renderThanks();
+    };
+
+    window.exitViewer = () => {
+      history.replaceState(null, "", location.pathname + location.search);
+      $("viewerMode").classList.add("hidden");
+      $("editorMode").classList.remove("hidden");
+    };
+
+    function init() {
+      const hash = location.hash || "";
+      if (hash.startsWith("#bugo=")) {
+        try {
+          const d = decodeData(hash.slice(6));
+          $("viewerCard").innerHTML = buildBugoHTML(d);
+          $("editorMode").classList.add("hidden");
+          $("viewerMode").classList.remove("hidden");
+          return;
+        } catch {}
+      } else if (hash.startsWith("#thanks=")) {
+        try {
+          const d = decodeData(hash.slice(8));
+          $("viewerCard").innerHTML = buildThanksHTML(d);
+          $("editorMode").classList.add("hidden");
+          $("viewerMode").classList.remove("hidden");
+          return;
+        } catch {}
+      }
+
+      const savedBugo = JSON.parse(localStorage.getItem("hosu_bugo_draft") || "null");
+      if (savedBugo) {
+        $("bName").value = savedBugo.name || "";
+        $("bAge").value = savedBugo.age || "";
+        $("bDeath").value = savedBugo.death || "";
+        $("bFuneral").value = savedBugo.funeral || "";
+        $("bHall").value = savedBugo.hall || "";
+        $("bRoom").value = savedBugo.room || "";
+        $("bAddr").value = savedBugo.addr || "";
+        $("bBurial").value = savedBugo.burial || "";
+        $("bAccount").value = savedBugo.account || "";
+        $("bMsg").value = savedBugo.msg || BUGO_TEMPLATES.basic;
+        if (Array.isArray(savedBugo.sangju) && savedBugo.sangju.length) sangju = savedBugo.sangju;
+      } else {
+        $("bMsg").value = BUGO_TEMPLATES.basic;
+      }
+
+      const savedThanks = JSON.parse(localStorage.getItem("hosu_thanks_draft") || "null");
+      if (savedThanks) {
+        $("tDeceased").value = savedThanks.deceased || "";
+        $("tSender").value = savedThanks.sender || "";
+        $("tMsg").value = savedThanks.msg || THANKS_TEMPLATES.basic;
+      } else {
+        $("tMsg").value = THANKS_TEMPLATES.basic;
+      }
+
+      renderSangjuInputs();
+      renderBugo();
+      renderThanks();
+    }
+
+    init();
+  </script>
+</body>
+</html>
