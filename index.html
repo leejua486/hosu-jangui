@@ -304,6 +304,12 @@
     <!-- 공유 링크로 열었을 때 보이는 뷰어 모드 -->
     <div id="viewerMode" class="hidden">
       <div class="card preview-box" id="viewerCard"></div>
+      <div class="card" style="padding: 14px 16px;">
+        <div class="share-grid" style="margin-top: 0;">
+          <button class="btn-kakao" onclick="shareViewerKakao()">카카오톡으로 공유하기</button>
+          <button class="btn-sms" onclick="shareViewerSMS()">문자로 공유하기</button>
+        </div>
+      </div>
     </div>
 
     <!-- 관리자 로그인 화면 -->
@@ -682,11 +688,12 @@
       };
     }
 
-    function buildSharePayload(kind) {
+    let viewerState = null;
+
+    function buildPayloadFromData(kind, d, customUrl) {
       const base = location.origin + location.pathname;
       if (kind === "bugo") {
-        const d = getBugoData();
-        const url = base.startsWith("http") ? `${base}?b=${encodeData(packBugo(d))}` : "";
+        const url = customUrl || (base.startsWith("http") ? `${base}?b=${encodeData(packBugo(d))}` : "");
         const lines = [
           `[호수장의 모바일 부고장]`,
           `故 ${d.name || "○○○"}${d.age ? ` (향년 ${d.age})` : ""} 님께서 별세하셨기에 삼가 알려드립니다.`,
@@ -695,14 +702,13 @@
           d.addr ? `• 주소: ${d.addr}` : "",
           d.funeral ? `• 발인: ${d.funeral}` : "",
           d.burial ? `• 장지: ${d.burial}` : "",
-          d.sangju.length ? `• 상주: ${d.sangju.map((s) => `${s.rel} ${s.name} ${s.phone}`.trim()).join(" / ")}` : "",
+          d.sangju && d.sangju.length ? `• 상주: ${d.sangju.map((s) => `${s.rel} ${s.name} ${s.phone}`.trim()).join(" / ")}` : "",
           d.account ? `• 부의계좌: ${d.account}` : "",
           url ? `\n모바일 부고장 보기:\n${url}` : ""
         ].filter(Boolean).join("\n");
         return { title: `故 ${d.name || "○○○"} 님 부고장 - 호수장의`, text: lines, url };
       } else {
-        const d = getThanksData();
-        const url = base.startsWith("http") ? `${base}?t=${encodeData(packThanks(d))}` : "";
+        const url = customUrl || (base.startsWith("http") ? `${base}?t=${encodeData(packThanks(d))}` : "");
         const lines = [
           `[호수장의 답례인사]`,
           d.msg || THANKS_TEMPLATES.basic,
@@ -712,6 +718,11 @@
         ].filter((v) => v !== "").join("\n");
         return { title: `감사 인사 - 호수장의`, text: lines, url };
       }
+    }
+
+    function buildSharePayload(kind) {
+      const d = kind === "bugo" ? getBugoData() : getThanksData();
+      return buildPayloadFromData(kind, d);
     }
 
     window.copyString = (str) => {
@@ -734,8 +745,7 @@
       return Boolean(window.Kakao && window.Kakao.isInitialized());
     }
 
-    window.shareKakao = function(kind) {
-      const p = buildSharePayload(kind);
+    function runKakaoShare(kind, d, p) {
       const shareUrl = p.url || (location.origin + location.pathname);
       if (ensureKakao()) {
         try {
@@ -743,7 +753,6 @@
           let cardDesc = "";
           let btnTitle = "모바일 부고장 보기";
           if (kind === "bugo") {
-            const d = getBugoData();
             cardTitle = `[호수장의 부고] 故 ${d.name || "○○○"}${d.age ? ` (향년 ${d.age})` : ""}`;
             const parts = [
               d.hall ? `빈소: ${d.hall} ${d.room}`.trim() : "",
@@ -752,7 +761,6 @@
             cardDesc = parts.join(" · ") || "삼가 고인의 명복을 빕니다.";
             btnTitle = "모바일 부고장 보기";
           } else {
-            const d = getThanksData();
             cardTitle = "[호수장의] 삼가 감사 인사 올립니다";
             cardDesc = (d.msg || THANKS_TEMPLATES.basic).split("\n")[0];
             btnTitle = "답례인사 보기";
@@ -790,6 +798,26 @@
           showToast("복사 완료! 카카오톡 대화창에 바로 붙여넣기 하세요.");
         });
       }
+    }
+
+    window.shareKakao = function(kind) {
+      const d = kind === "bugo" ? getBugoData() : getThanksData();
+      const p = buildPayloadFromData(kind, d);
+      runKakaoShare(kind, d, p);
+    };
+
+    window.shareViewerKakao = function() {
+      if (!viewerState) return;
+      const p = buildPayloadFromData(viewerState.kind, viewerState.data, viewerState.url);
+      runKakaoShare(viewerState.kind, viewerState.data, p);
+    };
+
+    window.shareViewerSMS = function() {
+      if (!viewerState) return;
+      const p = buildPayloadFromData(viewerState.kind, viewerState.data, viewerState.url);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const sep = isIOS ? "&" : "?";
+      location.href = `sms:${sep}body=${encodeURIComponent(p.text)}`;
     };
 
     window.sendSMS = (kind) => {
@@ -867,6 +895,7 @@
       if (bugoParam) {
         try {
           const d = unpackBugo(decodeData(bugoParam));
+          viewerState = { kind: "bugo", data: d, url: location.href };
           $("viewerCard").innerHTML = buildBugoHTML(d);
           $("editorMode").classList.add("hidden");
           $("viewerMode").classList.remove("hidden");
@@ -875,6 +904,7 @@
       } else if (thanksParam) {
         try {
           const d = unpackThanks(decodeData(thanksParam));
+          viewerState = { kind: "thanks", data: d, url: location.href };
           $("viewerCard").innerHTML = buildThanksHTML(d);
           $("editorMode").classList.add("hidden");
           $("viewerMode").classList.remove("hidden");
