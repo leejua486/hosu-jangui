@@ -304,11 +304,34 @@
     <!-- 공유 링크로 열었을 때 보이는 뷰어 모드 -->
     <div id="viewerMode" class="hidden">
       <div class="card preview-box" id="viewerCard"></div>
-      <button class="btn-copy" onclick="exitViewer()">새 부고장 / 답례인사 만들기</button>
+    </div>
+
+    <!-- 관리자 로그인 화면 -->
+    <div id="loginMode" class="hidden">
+      <div class="card" style="max-width: 400px; margin: 24px auto;">
+        <h2>관리자 로그인</h2>
+        <div class="field">
+          <label>아이디</label>
+          <input id="adminId" autocomplete="username" placeholder="관리자 아이디" />
+        </div>
+        <div class="field">
+          <label>비밀번호</label>
+          <input id="adminPw" type="password" autocomplete="current-password" placeholder="비밀번호" onkeydown="if(event.key==='Enter') handleAdminLogin()" />
+        </div>
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink); margin: 10px 0 14px; cursor:pointer;">
+          <input id="keepLogin" type="checkbox" checked style="width:auto;" />
+          <span>이 기기에서 로그인 유지</span>
+        </label>
+        <button class="btn-sms" style="width:100%;" onclick="handleAdminLogin()">로그인</button>
+        <p id="loginErr" style="color:#b91c1c; font-size:12px; margin:10px 0 0; display:none;">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+      </div>
     </div>
 
     <!-- 작성 모드 -->
-    <div id="editorMode">
+    <div id="editorMode" class="hidden">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <button class="btn-sm" onclick="logoutAdmin()">로그아웃</button>
+      </div>
       <div class="tabs">
         <button class="tab-btn active" id="tabBugo" onclick="switchTab('bugo')">부고장 만들기</button>
         <button class="tab-btn" id="tabThanks" onclick="switchTab('thanks')">답례인사 만들기</button>
@@ -773,10 +796,47 @@
       renderThanks();
     };
 
-    window.exitViewer = () => {
-      history.replaceState(null, "", location.pathname + location.search);
-      $("viewerMode").classList.add("hidden");
+    const ADMIN_AUTH_HASH = "946558635e78730b08d87eeeffc125a8049a877a83fbdbdd2d407bdff5ea71cf";
+    const AUTH_KEY = "hosu_admin_token_v1";
+
+    async function sha256Hex(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function isAdminAuthed() {
+      return localStorage.getItem(AUTH_KEY) === ADMIN_AUTH_HASH ||
+             sessionStorage.getItem(AUTH_KEY) === ADMIN_AUTH_HASH;
+    }
+
+    function openEditor() {
+      $("loginMode").classList.add("hidden");
       $("editorMode").classList.remove("hidden");
+    }
+
+    window.handleAdminLogin = async function() {
+      const id = $("adminId").value.trim();
+      const pw = $("adminPw").value;
+      const hash = await sha256Hex(`${id}:${pw}`);
+      if (hash === ADMIN_AUTH_HASH) {
+        $("loginErr").style.display = "none";
+        if ($("keepLogin").checked) {
+          localStorage.setItem(AUTH_KEY, ADMIN_AUTH_HASH);
+        } else {
+          sessionStorage.setItem(AUTH_KEY, ADMIN_AUTH_HASH);
+        }
+        $("adminPw").value = "";
+        openEditor();
+      } else {
+        $("loginErr").style.display = "block";
+      }
+    };
+
+    window.logoutAdmin = function() {
+      localStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(AUTH_KEY);
+      $("editorMode").classList.add("hidden");
+      $("loginMode").classList.remove("hidden");
     };
 
     function init() {
@@ -831,6 +891,12 @@
       renderSangjuInputs();
       renderBugo();
       renderThanks();
+
+      if (isAdminAuthed()) {
+        openEditor();
+      } else {
+        $("loginMode").classList.remove("hidden");
+      }
     }
 
     init();
